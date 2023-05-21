@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Egg Game</title>
+    <style>
+        body {
+            text-align: center;
+        }
+
+        #egg-image {
+            width: 200px;
+            height: 200px;
+        }
+
+        #result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Egg Game</h1>
+
+    <img id="egg-image" src="https://www.pngmart.com/files/12/Pink-Easter-Egg-Transparent-Background.png">
+
+    <button id="egg-button" onclick="crackEgg()">Open Egg</button>
+
+    <div id="result">
+        <h2>Results:</h2>
+        <ul id="items"></ul>
+    </div>
+
+    <script>
+        var eggButton = document.getElementById("egg-button");
+        var eggImage = document.getElementById("egg-image");
+        var itemsList = document.getElementById("items");
+        var results = [];
+
+        eggButton.addEventListener("click", crackEgg);
+
+        function crackEgg() {
+            eggButton.disabled = true;
+            eggImage.classList.add("shake");
+
+            setTimeout(function() {
+                eggButton.disabled = false;
+                eggImage.classList.remove("shake");
+                revealItem();
+            }, 3000);
+        }
+
+        function revealItem() {
+            var rand = Math.random() * 100;
+            var item;
+
+            if (rand < 5) {
+                item = createItem("Dino", "https://i.pinimg.com/originals/fb/0c/fd/fb0cfd75627de69e366519cfd4217ba6.png");
+            } else if (rand < 45) {
+                item = createItem("Koe", "https://static.vecteezy.com/system/resources/previews/011/213/347/original/cartoon-cute-cow-free-png.png");
+            } else {
+                item = createItem("Kip", "https://www.pngall.com/wp-content/uploads/2018/05/Hen-PNG-Pic.png");
+            }
+
+            itemsList.appendChild(item);
+
+            results.push(item.firstChild.textContent);
+
+            var itemCount = {};
+            results.forEach(function(item) {
+                itemCount[item] = (itemCount[item] || 0) + 1;
+            });
+
+            var resultText = "";
+            for (var key in itemCount) {
+                var probability = (itemCount[key] / results.length) * 100;
+                resultText += key + ": " + probability.toFixed(2) + "%, ";
+            }
+
+            document.getElementById("result").textContent = "Results: " + resultText.slice(0, -2);
+        }
+
+        function createItem(name, imageUrl) {
+            var item = document.createElement("li");
+            var itemImage = document.createElement("img");
+            var itemName = document.createElement("span");
+
+            itemImage.src = imageUrl;
+            itemImage.alt = name + " image";
+            itemImage.style.width = "100px";
+            itemImage.style.height = "100px";
+
+            itemName.textContent = name;
+
+            item.appendChild(itemImage);
+            item.appendChild(itemName);
+
+            return item;
+        }
+    </script>
+</body>
+</html>
