@@ -1,99 +1,139 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Egg Game</title>
+    <title>Spin Wheel</title>
     <style>
         body {
             text-align: center;
         }
 
-        #egg-image {
-            width: 200px;
-            height: 200px;
+        #spin-wheel {
+            width: 400px;
+            height: 400px;
+            margin: 50px auto;
+            position: relative;
         }
 
-        #result {
+        #spin-wheel div {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 50%;
+            background-color: #f7f7f7;
+        }
+
+        #text-box {
+            width: 400px;
+            height: 300px;
+            margin: 0 auto;
+            margin-right: 50px;
+            margin-top: 50px;
+            font-size: 20px;
+            resize: none;
+        }
+
+        #button-container {
+            margin-top: 20px;
+        }
+
+        #spin-result-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: #f7f7f7;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            display: none;
+        }
+
+        #spin-result-popup h2 {
+            margin-top: 0;
+        }
+
+        #close-button {
+            text-align: center;
             margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <h1>Egg Game</h1>
+    <h1>Spin Wheel</h1>
 
-    <img id="egg-image" src="https://www.pngmart.com/files/12/Pink-Easter-Egg-Transparent-Background.png">
+    <div id="spin-wheel">
+        <div></div>
+    </div>
 
-    <button id="egg-button" onclick="crackEgg()">Open Egg</button>
+    <textarea id="text-box" placeholder="Type hier de woorden"></textarea>
 
-    <div id="result">
-        <h2>Results:</h2>
-        <ul id="items"></ul>
+    <div id="button-container">
+        <button onclick="addWords()">Toevoegen</button>
+        <button onclick="spinWheel()">Draaien</button>
+    </div>
+
+    <div id="spin-result-popup">
+        <h2>Resultaat:</h2>
+        <p id="result-word"></p>
+        <button id="close-button" onclick="closePopup()">Sluiten</button>
     </div>
 
     <script>
-        var eggButton = document.getElementById("egg-button");
-        var eggImage = document.getElementById("egg-image");
-        var itemsList = document.getElementById("items");
-        var results = [];
+        var spinWheel = document.getElementById("spin-wheel");
+        var spinResultPopup = document.getElementById("spin-result-popup");
+        var resultWord = document.getElementById("result-word");
+        var closePopupButton = document.getElementById("close-button");
+        var words = [];
 
-        eggButton.addEventListener("click", crackEgg);
+        function addWords() {
+            var textBox = document.getElementById("text-box");
+            var text = textBox.value.trim();
 
-        function crackEgg() {
-            eggButton.disabled = true;
-            eggImage.classList.add("shake");
-
-            setTimeout(function() {
-                eggButton.disabled = false;
-                eggImage.classList.remove("shake");
-                revealItem();
-            }, 3000);
+            if (text !== "") {
+                var newWords = text.split("\n");
+                words = words.concat(newWords);
+                textBox.value = "";
+                updateSpinWheel();
+            }
         }
 
-        function revealItem() {
-            var rand = Math.random() * 100;
-            var item;
+        function updateSpinWheel() {
+            var wheelDiv = spinWheel.querySelector("div");
+            wheelDiv.textContent = "";
+            wheelDiv.style.transform = "rotate(0deg)";
 
-            if (rand < 5) {
-                item = createItem("Dino", "https://i.pinimg.com/originals/fb/0c/fd/fb0cfd75627de69e366519cfd4217ba6.png");
-            } else if (rand < 45) {
-                item = createItem("Koe", "https://static.vecteezy.com/system/resources/previews/011/213/347/original/cartoon-cute-cow-free-png.png");
-            } else {
-                item = createItem("Kip", "https://www.pngall.com/wp-content/uploads/2018/05/Hen-PNG-Pic.png");
+            for (var i = 0; i < words.length; i++) {
+                var wordSpan = document.createElement("span");
+                wordSpan.textContent = words[i];
+                wheelDiv.appendChild(wordSpan);
+                wheelDiv.appendChild(document.createElement("br"));
             }
-
-            itemsList.appendChild(item);
-
-            results.push(item.firstChild.textContent);
-
-            var itemCount = {};
-            results.forEach(function(item) {
-                itemCount[item] = (itemCount[item] || 0) + 1;
-            });
-
-            var resultText = "";
-            for (var key in itemCount) {
-                var probability = (itemCount[key] / results.length) * 100;
-                resultText += key + ": " + probability.toFixed(2) + "%, ";
-            }
-
-            document.getElementById("result").textContent = "Results: " + resultText.slice(0, -2);
         }
 
-        function createItem(name, imageUrl) {
-            var item = document.createElement("li");
-            var itemImage = document.createElement("img");
-            var itemName = document.createElement("span");
+        function spinWheel() {
+            if (words.length > 0) {
+                var wheelDiv = spinWheel.querySelector("div");
+                var degrees = 360 * Math.random() + 720;
+                wheelDiv.style.transform = "rotate(" + degrees + "deg)";
+                setTimeout(function() {
+                    var resultIndex = Math.floor(Math.random() * words.length);
+                    var result = words[resultIndex];
+                    showPopup(result);
+                }, 5000);
+            }
+        }
 
-            itemImage.src = imageUrl;
-            itemImage.alt = name + " image";
-            itemImage.style.width = "100px";
-            itemImage.style.height = "100px";
+        function showPopup(result) {
+            resultWord.textContent = result;
+            spinResultPopup.style.display = "block";
+        }
 
-            itemName.textContent = name;
-
-            item.appendChild(itemImage);
-            item.appendChild(itemName);
-
-            return item;
+        function closePopup() {
+            spinResultPopup.style.display = "none";
         }
     </script>
 </body>
